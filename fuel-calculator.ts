@@ -1,6 +1,11 @@
 interface MaxStint {
   maxStintTime: number;
-  remainingFuel: number;
+  fuelRemaining: number;
+}
+
+interface StintCompletion {
+  laps: number;
+  fuelRemaining: number;
 }
 
 /**
@@ -26,21 +31,22 @@ export const calculateFuelForRace = (
  * Calculate the max duration of a stint.
  * @param lapTime in seconds
  * @param fuelPerLap in litres
- * @param fuelCapacity in litres
- * @returns the maxStintTime and estimated remainingFuel after the stint
+ * @param fuelLoad in litres
+ * @returns the maxStintTime (seconds) and estimated fuelRemaining (litres) after the stint
  */
 export const calculateMaxStintDuration = (
   lapTime: number,
   fuelPerLap: number,
-  fuelCapacity: number
+  fuelLoad: number
 ): MaxStint => {
-  const maximum: number = fuelCapacity / fuelPerLap;
-  const remainder: number = fuelCapacity % fuelPerLap;
-  const maxCompletedLaps: number = Math.floor(maximum);
-  const remainingFuel: number = remainder * fuelPerLap;
+  const stintCompletion: StintCompletion = {
+    laps: fuelLoad / fuelPerLap,
+    fuelRemaining: parseFloat((fuelLoad % fuelPerLap).toFixed(3))
+  };
+  const maxCompletedLaps: number = Math.floor(stintCompletion.laps);
   const maxStintTime: number = maxCompletedLaps * lapTime;
 
-  return { maxStintTime, remainingFuel };
+  return { maxStintTime, fuelRemaining: stintCompletion.fuelRemaining };
 };
 
 /**
@@ -49,17 +55,17 @@ export const calculateMaxStintDuration = (
  * @param raceDuration in minutes
  * @param lapTime in seconds
  * @param fuelPerLap in litres
- * @param fuelCapacity in litres
+ * @param fuelLoad in litres
  * @returns minStints required
  */
 export const calculateMinStints = (
   raceDuration: number,
   lapTime: number,
   fuelPerLap: number,
-  fuelCapacity: number
+  fuelLoad: number
 ): number => {
   const minStints: number = Math.ceil((raceDuration * 60) / calculateMaxStintDuration(
-    lapTime, fuelPerLap, fuelCapacity).maxStintTime);
+    lapTime, fuelPerLap, fuelLoad).maxStintTime);
 
   return minStints;
 };
